@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch My Hearts</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background: #ffe6f2;
+            text-align: center;
+            color: #ff4081;
+        }
+        #gameCanvas {
+            display: block;
+            background: #fff0f5;
+            border: 5px solid #ffb3c6;
+            margin: auto;
+        }
+        h1 {
+            margin: 20px 0;
+            font-size: 2.5rem;
+            color: #ff4081;
+        }
+        #message {
+            font-size: 1.5rem;
+            color: #ff5e78;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Catch My Hearts 💖</h1>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div id="message"></div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Basket
+        const basket = {
+            x: 175,
+            y: 550,
+            width: 50,
+            height: 20,
+            color: '#ff5e78',
+            moveLeft: false,
+            moveRight: false,
+            speed: 6
+        };
+
+        // Hearts
+        const hearts = [];
+        let heartSpeed = 2;
+
+        // Score
+        let score = 0;
+
+        // Messages
+        const messages = [
+            "You caught my heart 💖",
+            "Oyee, you're amazing! 😊",
+            "Stop being so cute! 😍",
+            "You make my day brighter ✨",
+            "Dumbo, you’re the best! 💕"
+        ];
+
+        // Add Hearts Randomly
+        function spawnHeart() {
+            const heart = {
+                x: Math.random() * 360,
+                y: 0,
+                radius: 10,
+                color: '#ff4081'
+            };
+            hearts.push(heart);
+        }
+
+        // Draw Basket
+        function drawBasket() {
+            ctx.fillStyle = basket.color;
+            ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+        }
+
+        // Draw Hearts
+        function drawHearts() {
+            hearts.forEach(heart => {
+                ctx.beginPath();
+                ctx.arc(heart.x, heart.y, heart.radius, 0, Math.PI * 2);
+                ctx.fillStyle = heart.color;
+                ctx.fill();
+            });
+        }
+
+        // Move Hearts
+        function moveHearts() {
+            hearts.forEach((heart, index) => {
+                heart.y += heartSpeed;
+
+                // Check if heart is caught
+                if (
+                    heart.x > basket.x &&
+                    heart.x < basket.x + basket.width &&
+                    heart.y > basket.y &&
+                    heart.y < basket.y + basket.height
+                ) {
+                    hearts.splice(index, 1);
+                    score++;
+                    displayMessage();
+                    if (score % 5 === 0) heartSpeed += 1; // Increase speed every 5 points
+                }
+
+                // Remove hearts that fall off
+                if (heart.y > canvas.height) {
+                    hearts.splice(index, 1);
+                }
+            });
+        }
+
+        // Display Cute Message
+        function displayMessage() {
+            const messageBox = document.getElementById('message');
+            const finalMessage = "You won all my hearts, Dumbo! 💕 (ab padh le with a le)";
+            if (score >= 20) { // Trigger final message after 20 points
+                messageBox.textContent = finalMessage;
+            } else {
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                messageBox.textContent = randomMessage;
+            }
+        }
+
+        // Game Loop
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBasket();
+            drawHearts();
+            moveHearts();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Move Basket
+        function moveBasket() {
+            if (basket.moveLeft && basket.x > 0) basket.x -= basket.speed;
+            if (basket.moveRight && basket.x + basket.width < canvas.width) basket.x += basket.speed;
+        }
+
+        // Event Listeners for Controls
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') basket.moveLeft = true;
+            if (e.key === 'ArrowRight') basket.moveRight = true;
+        });
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft') basket.moveLeft = false;
+            if (e.key === 'ArrowRight') basket.moveRight = false;
+        });
+
+        // Start Game
+        setInterval(spawnHeart, 1000);
+        setInterval(moveBasket, 10);
+        gameLoop();
+    </script>
+</body>
+</html>
